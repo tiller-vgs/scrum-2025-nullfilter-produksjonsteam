@@ -22,7 +22,7 @@ assignees: ''
 <!-- 
 - An integer estimate how important this user story is.
 - It does not matter if the value is 11 or 200 (200 is simply more important than 11).
-
+-->
 # Initial Estimation of Effort
 <!-- 
 - Provide an initial estimate of the amount of work that this user story will require to be completely and successfully implemented using the following estimation scale:
