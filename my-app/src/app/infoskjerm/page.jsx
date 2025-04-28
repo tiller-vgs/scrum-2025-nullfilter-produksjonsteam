@@ -87,6 +87,64 @@ export default function InfoscreenPage() {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Product Carousel - takes up 2/3 of the width on medium screens and up */}
+        <div className="md:col-span-2">
+          <h2 className="text-xl font-semibold mb-4">Våre produkter</h2>
+          <Carousel
+            plugins={[
+              Autoplay({
+                delay: 3000,
+              }),
+            ]}
+            opts={{
+              loop: true,
+            }}
+            className="w-full"
+          >
+            <CarouselContent>
+              {products.map((product) => (
+                <CarouselItem
+                  key={product.id}
+                  className="md:basis-1/2 lg:basis-1/3"
+                >
+                  <Card>
+                    <div className="relative">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-48 object-cover rounded-t-lg"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src =
+                            "https://placehold.co/400x300?text=Produktbilde";
+                        }}
+                      />
+                      <div className="absolute top-2 right-2">
+                        <div className="rounded-full bg-primary text-white px-4 py-1 text-sm font-medium">
+                          {product.price}
+                        </div>
+                      </div>
+                      {product.promotion && (
+                        <div className="absolute bottom-2 left-2">
+                          <Badge variant="destructive" className="text-sm">
+                            {product.promotion}
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+                    <CardContent className="pt-4">
+                      <CardTitle className="text-lg">{product.name}</CardTitle>
+                      <CardDescription>{product.description}</CardDescription>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden md:flex" />
+            <CarouselNext className="hidden md:flex" />
+          </Carousel>
+        </div>
+
         
       </div>
     </div>
