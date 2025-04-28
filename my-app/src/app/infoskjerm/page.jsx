@@ -145,7 +145,36 @@ export default function InfoscreenPage() {
           </Carousel>
         </div>
 
-        
+        {/* Opening Hours Table - takes up 1/3 of the width on medium screens and up */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Åpningstider</h2>
+          <Card>
+            <CardContent className="pt-6">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableCell className="font-medium">Dag</TableCell>
+                    <TableCell>Tid</TableCell>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {openingHours.map((item) => (
+                    <TableRow key={item.day}>
+                      <TableCell className="font-medium">{item.day}</TableCell>
+                      <TableCell
+                        className={
+                          item.hours === "Stengt" ? "text-red-500" : ""
+                        }
+                      >
+                        {item.hours}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
