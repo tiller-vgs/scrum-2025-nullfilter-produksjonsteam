@@ -79,37 +79,61 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Flip background and foreground */
+  --background: #000000; /* Pure black background */
+  --foreground: #ffffff; /* Pure white text */
+
+  /* Flip card colors */
+  --card: #121212; /* Dark cards */
+  --card-foreground: #ffffff; /* White text on cards */
+
+  /* Flip popover colors */
+  --popover: #121212; /* Dark popovers */
+  --popover-foreground: #ffffff; /* White text on popovers */
+
+  /* Flip primary colors */
+  --primary: #ffffff; /* White primary */
+  --primary-foreground: #000000; /* Black text on primary */
+
+  /* Flip secondary colors */
+  --secondary: #1a1a1a; /* Dark secondary */
+  --secondary-foreground: #ffffff; /* White text on secondary */
+
+  /* Flip muted colors */
+  --muted: #1a1a1a; /* Dark muted */
+  --muted-foreground: #a0a0a0; /* Light grey text on muted */
+
+  /* Flip accent colors */
+  --accent: #1a1a1a; /* Dark accent */
+  --accent-foreground: #ffffff; /* White text on accent */
+
+  /* Keep destructive as a recognizable red but darken it */
+  --destructive: #b91c1c; /* Dark red */
+  --destructive-foreground: #ffffff; /* White text on destructive */
+
+  /* Flip borders and inputs */
+  --border: #333333; /* Dark borders */
+  --input: #333333; /* Dark inputs */
+  --ring: #555555; /* Dark ring */
+
+  /* Flip sidebar colors */
+  --sidebar: #121212; /* Dark sidebar */
+  --sidebar-foreground: #ffffff; /* White text on sidebar */
+  --sidebar-primary: #ffffff; /* White primary on sidebar */
+  --sidebar-primary-foreground: #000000; /* Black text on sidebar primary */
+  --sidebar-accent: #1a1a1a; /* Dark accent on sidebar */
+  --sidebar-accent-foreground: #ffffff; /* White text on sidebar accent */
+  --sidebar-border: #333333; /* Dark borders on sidebar */
+  --sidebar-ring: #555555; /* Dark rings on sidebar */
+}
+
+/* Force dark mode styling */
+@layer utilities {
+  html.dark,
+  html.dark body {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+  }
 }
 
 @layer base {
