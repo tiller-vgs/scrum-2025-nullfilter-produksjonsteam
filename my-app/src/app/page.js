@@ -1,32 +1,12 @@
 import React from "react";
+import { LoginForm } from "@/components/login-form";
 
-function Page() {
+export default function Page() {
   return (
-    <div>
-      <label htmlFor="uname">Username:</label>
-      <br />
-      <input
-        className="bg-gray-200 outline-black outline-1"
-        type="text"
-        id="uname"
-        name="uname"
-        autoComplete="off"
-      />
-      <br />
-      <label htmlFor="password">Password:</label>
-      <br />
-      <input
-        className="bg-gray-200 outline-black outline-1"
-        type="text"
-        id="password"
-        name="password"
-        autoComplete="off"
-      />
-      <br />
-      <br />
-      <input className="bg-blue-100" type="submit" value="Submit" />
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <LoginForm />
+      </div>
     </div>
   );
 }
-
-export default Page;
