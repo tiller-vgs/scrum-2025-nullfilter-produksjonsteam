@@ -1,65 +1,88 @@
 "use client";
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Card,
-  CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import { Badge } from "@/components/ui/badge";
+import { useRouter } from "next/navigation";
 
 export default function InfoscreenPage() {
-  // State for database data
+  // State
+  const router = useRouter();
   const [products, setProducts] = useState([]);
   const [openingHours, setOpeningHours] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [emblaApi, setEmblaApi] = useState(null);
+  const [activeSlide, setActiveSlide] = useState(0);
 
-  // Update time every minute
+  // Group products into pairs (stacked)
+  // Group products into pairs (stacked) without duplication
+  const columns = useMemo(() => {
+    const pairs = [];
+    // Create pairs without duplication
+    for (let i = 0; i < products.length; i += 2) {
+      // For the last item if there's an odd number of products
+      if (i + 1 >= products.length) {
+        pairs.push([products[i], null]);
+      } else {
+        pairs.push([products[i], products[i + 1]]);
+      }
+    }
+    return pairs;
+  }, [products]);
+
+  const slides = useMemo(() => {
+    const len = columns.length;
+    return Array.from({ length: len }).map((_, i) => [
+      columns[i],
+      columns[(i + 1) % len],
+      columns[(i + 2) % len],
+    ]);
+  }, [columns]);
+
+  const navigateToDashboard = () => {
+    router.push("/dashboard");
+  };
+
+  // Track slide index
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 60000);
+    if (!emblaApi) return;
+    const onSelect = () => setActiveSlide(emblaApi.selectedScrollSnap());
+    emblaApi.on("select", onSelect);
+    onSelect();
+    return () => emblaApi.off("select", onSelect);
+  }, [emblaApi]);
 
+  // Time updater
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(timer);
   }, []);
 
-  // Format date in Norwegian
-  const formatDate = () => {
-    const options = {
+  // Formatters & helpers
+  const formatDate = () =>
+    currentTime.toLocaleDateString("nb-NO", {
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
-    };
-    return currentTime.toLocaleDateString("nb-NO", options);
-  };
-
-  // Format time in Norwegian
-  const formatTime = () => {
-    return currentTime.toLocaleTimeString("nb-NO", {
+    });
+  const formatTime = () =>
+    currentTime.toLocaleTimeString("nb-NO", {
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
-
-  // Function to highlight today's opening hours
   const isToday = (day) => {
     const days = [
       "Søndag",
@@ -73,51 +96,74 @@ export default function InfoscreenPage() {
     return days[currentTime.getDay()] === day;
   };
 
-  // Fetch data from database via API
+  const renderProductCard = (product) => {
+    if (!product) return <div className="h-[200px] bg-muted/20"></div>;
+
+    return (
+      <>
+        <div className="relative h-[200px]">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "https://placehold.co/400x300?text=Produktbilde";
+            }}
+          />
+          {product.promotion && (
+            <Badge
+              variant="destructive"
+              className="absolute bottom-2 left-2 px-2 py-1 text-xs shadow-md"
+            >
+              {product.promotion}
+            </Badge>
+          )}
+        </div>
+        <CardContent className="p-3 flex flex-col h-[calc(100%-180px)]">
+          <CardTitle className="text-lg mb-0">{product.name}</CardTitle>
+          <CardDescription className="text-sm mt-1">
+            {product.description}
+          </CardDescription>
+        </CardContent>
+      </>
+    );
+  };
+
+  // Fetch data
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        // Fetch implementation remains unchanged
-        setLoading(true);
-
-        // Fetch products
-        const productsRes = await fetch("/api/products");
-        if (!productsRes.ok) throw new Error("Failed to fetch products");
-        const productsData = await productsRes.json();
-
-        // Fetch opening hours
-        const hoursRes = await fetch("/api/opening-hours");
-        if (!hoursRes.ok) throw new Error("Failed to fetch opening hours");
-        const hoursData = await hoursRes.json();
-
-        // Update state with fetched data
-        setProducts(productsData);
-        setOpeningHours(hoursData);
+        const [prodRes, hoursRes] = await Promise.all([
+          fetch("/api/products"),
+          fetch("/api/opening-hours"),
+        ]);
+        if (!prodRes.ok || !hoursRes.ok) throw new Error();
+        setProducts(await prodRes.json());
+        setOpeningHours(await hoursRes.json());
         setError(null);
-      } catch (err) {
-        console.error("Error fetching data:", err);
-        setError("Kunne ikke hente data fra databasen. Bruker reserve-data.");
-
-        // Fallback data remains unchanged
+      } catch {
+        setError("Kunne ikke hente data, viser reserve-data.");
         setProducts([
           {
             id: 1,
             name: "Espresso",
-            description: "En kraftfull kaffe med intensiv smak",
+            description: "Intens kaffe",
             price: "32kr",
             image: "/images/espresso.png",
           },
           {
             id: 2,
             name: "Cappuccino",
-            description: "Espresso med dampet melk og melkeskum",
+            description: "Espresso med melk",
             price: "45kr",
             image: "/images/cappuccino.png",
           },
           {
             id: 3,
             name: "Kanelbolle",
-            description: "Nybakt kanelbolle med sukker",
+            description: "Nybakt kanelbolle",
             price: "35kr",
             image: "/images/kanelbolle.png",
             promotion: "2 for 50kr",
@@ -125,12 +171,11 @@ export default function InfoscreenPage() {
           {
             id: 4,
             name: "Croissant",
-            description: "Fransk croissant med smør",
+            description: "Fransk croissant",
             price: "38kr",
             image: "/images/croissant.png",
           },
         ]);
-
         setOpeningHours([
           { day: "Mandag", hours: "09:30 - 12:00" },
           { day: "Tirsdag", hours: "09:30 - 12:00" },
@@ -144,25 +189,19 @@ export default function InfoscreenPage() {
         setLoading(false);
       }
     };
-
     fetchData();
-
-    // Refresh data every 5 minutes
-    const refreshInterval = setInterval(fetchData, 300000);
-
-    return () => clearInterval(refreshInterval);
+    const interval = setInterval(fetchData, 300_000);
+    return () => clearInterval(interval);
   }, []);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-background/50 to-background">
+      <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
-          <h2 className="text-3xl font-bold mb-4 text-primary">
+          <h2 className="text-3xl font-bold text-primary mb-4">
             Laster inn...
           </h2>
-          <p className="text-xl text-foreground/80">
-            Vennligst vent, henter informasjon.
-          </p>
+          <p className="text-xl text-foreground/80">Vennligst vent.</p>
         </div>
       </div>
     );
@@ -170,195 +209,202 @@ export default function InfoscreenPage() {
 
   return (
     <div data-page="infoscreen" className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-4 max-w-[95%] w-full h-[calc(100vh-16px)] flex flex-col">
+      <div className="container mx-auto w-full flex flex-col">
         {error && (
-          <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-md text-yellow-700 text-lg">
+          <div className=" bg-yellow-50 border-l-4 border-yellow-400 rounded-md text-yellow-700">
             {error}
           </div>
         )}
-
-        {/* Improved Title & Description with Find Us moved to date area */}
-        <div className="mb-4">
-          <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground p-6 rounded-lg shadow-xl">
-            <div className="flex flex-col lg:flex-row justify-between items-start">
-              <div>
-                <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-                  NullFilter Kafé
-                </h1>
-                <p className="text-xl md:text-2xl mt-3 text-primary-foreground/90 max-w-2xl">
-                  Velkommen til NullFilter - Din lokale kafé med hjemmelagde
-                  produkter og nybrent kaffe.
-                </p>
+        <div className="mb-3">
+          <div className="bg-white border-b-3 border-primary rounded-md shadow-md py-4 px-6">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                <div className="bg-primary text-white p-3 rounded-md hidden sm:flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="28"
+                    height="28"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M17 8h1a4 4 0 1 1 0 8h-1"></path>
+                    <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"></path>
+                    <line x1="6" y1="2" x2="6" y2="4"></line>
+                    <line x1="10" y1="2" x2="10" y2="4"></line>
+                    <line x1="14" y1="2" x2="14" y2="4"></line>
+                  </svg>
+                </div>
+                <div>
+                  <h1
+                    className="text-3xl font-bold text-primary tracking-tight leading-none"
+                    onClick={navigateToDashboard}
+                  >
+                    NullFilter Kafé
+                  </h1>
+                  <p className="text-sm text-gray-500 hidden sm:block">
+                    Din lokale kafé på Tiller VGS
+                  </p>
+                </div>
               </div>
 
-              {/* Date and Time Display with Find Us info */}
-              <div className="bg-card text-card-foreground p-4 rounded-lg shadow-md mt-4 lg:mt-0 min-w-[250px]">
-                <div className="text-xl font-medium">{formatDate()}</div>
-                <div className="text-3xl md:text-4xl font-bold mb-3">
-                  {formatTime()}
+              <div className="flex items-center gap-5">
+                <div className="text-right">
+                  <div className="text-sm font-medium text-gray-500">
+                    {formatDate()}
+                  </div>
+                  <div className="text-2xl font-bold text-primary">
+                    {formatTime()}
+                  </div>
                 </div>
-
-                <div className="mt-2 pt-2 border-t border-border">
-                  <h3 className="text-lg font-bold mb-1">Finn oss</h3>
-                  <p>Tiller VGS, 1. etasje</p>
-                  <p>Åpent for alle elever og ansatte</p>
+                <div className="hidden md:block border-l border-gray-200 pl-4">
+                  <div className="flex items-center gap-1.5">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                    </svg>
+                    <span className="text-sm font-medium">
+                      Tiller VGS, 1. etasje
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Main content with improved layout - fill all available space */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-grow">
-          {/* Left side content */}
-          <div className="lg:col-span-9 flex flex-col">
-            <h2 className="text-2xl md:text-3xl font-bold mb-3 text-primary">
-              Våre produkter
+        {/* Main Content */}
+        <div className="grid grid-cols-3 grid-rows-1 lg:grid-cols-12 gap-2 flex-grow">
+          {/* Products Carousel */}
+          <div className="lg:col-span-8 flex flex-col">
+            <h2 className="text-2xl md:text-3xl font-bold text-primary">
+              Produkter
             </h2>
-            <div className="flex-grow">
-              {products.length > 0 ? (
-                <Carousel
-                  plugins={[
-                    Autoplay({
-                      delay: 15000, // 15 seconds per slide
-                    }),
-                  ]}
-                  opts={{
-                    loop: true,
-                    align: "start",
-                    dragFree: false,
-                  }}
-                  className="w-full h-full"
-                >
-                  <CarouselContent className="h-full">
-                    {/* Group products into chunks of 6 */}
-                    {Array(Math.ceil(products.length / 6))
-                      .fill()
-                      .map((_, groupIndex) => (
-                        <CarouselItem
-                          key={`group-${groupIndex}`}
-                          className="h-full basis-full pl-0"
-                        >
-                          <div className="grid grid-cols-3 grid-rows-2 gap-4 h-full">
-                            {products
-                              .slice(groupIndex * 6, (groupIndex + 1) * 6)
-                              .map((product) => (
-                                <div key={product.id} className="h-full">
-                                  <Card className="border border-border shadow-lg overflow-hidden h-full">
-                                    <div className="relative h-[140px]">
-                                      <img
-                                        src={product.image}
-                                        alt={product.name}
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                          e.target.onerror = null;
-                                          e.target.src =
-                                            "https://placehold.co/400x300?text=Produktbilde";
-                                        }}
-                                      />
-                                      <div className="absolute top-2 right-2">
-                                        <div className="rounded-full bg-primary text-primary-foreground px-3 py-1 text-sm font-medium shadow-md">
-                                          {product.price}
-                                        </div>
-                                      </div>
-                                      {product.promotion && (
-                                        <div className="absolute bottom-2 left-2">
-                                          <Badge
-                                            variant="destructive"
-                                            className="px-2 py-1 text-xs shadow-md"
-                                          >
-                                            {product.promotion}
-                                          </Badge>
-                                        </div>
-                                      )}
-                                    </div>
-                                    <CardContent className="p-3 flex flex-col h-[calc(100%-140px)]">
-                                      <CardTitle className="text-lg mb-1">
-                                        {product.name}
-                                      </CardTitle>
-                                      <CardDescription className="text-sm flex-1">
-                                        {product.description}
-                                      </CardDescription>
-                                    </CardContent>
-                                  </Card>
-                                </div>
-                              ))}
-                          </div>
-                        </CarouselItem>
-                      ))}
-                  </CarouselContent>
-                </Carousel>
-              ) : (
-                <div className="text-center p-10">
-                  <p className="text-xl">Ingen produkter funnet</p>
+            <div className="flex-grow relative">
+              <Carousel
+                plugins={[Autoplay({ delay: 5000 })]}
+                opts={{
+                  loop: true,
+                  align: "start",
+                  slidesToScroll: 1,
+                  speed: 3,
+                }}
+                setApi={setEmblaApi}
+                className="w-full h-full overflow-hidden"
+              >
+                {/* use gap+px on the track, basis-1/3 on each item */}
+                <CarouselContent className="flex h-full gap-1 px-1">
+                  {columns.map(([top, bottom], idx) => (
+                    <CarouselItem
+                      key={idx}
+                      className="flex-shrink-0 basis-1/3 h-full"
+                    >
+                      <div className="flex flex-col justify-between h-full space-y-1">
+                        <Card className="border border-border shadow-lg overflow-hidden">
+                          {renderProductCard(top)}
+                        </Card>
+                        <Card className="border border-border shadow-lg overflow-hidden">
+                          {renderProductCard(bottom)}
+                        </Card>
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+
+                {/* Slide counter */}
+                <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-sm px-2 py-1 rounded">
+                  {activeSlide + 1}/{columns.length}
                 </div>
-              )}
+                {/* Indicators */}
+                <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-2">
+                  {columns.map((_, i) => (
+                    <div
+                      key={i}
+                      className={`h-2 rounded-full transition-all ${
+                        i === activeSlide ? "w-6 bg-primary" : "w-2 bg-muted"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </Carousel>
             </div>
           </div>
 
-          {/* Right side content */}
-          <div className="lg:col-span-3 flex flex-col gap-4">
-            {/* Today's sale - Moved to the top for more visibility */}
-            <Card className="border-0 shadow-lg mb-0 bg-gradient-to-r from-destructive to-amber-500 text-white">
-              <CardContent className="pt-4">
-                <h3 className="text-2xl font-bold mb-2">Dagens tilbud 🔥</h3>
-                <p className="text-lg mb-2 font-medium">
-                  Kjøp en kaffe, få en kanelbolle til halv pris!
-                </p>
-              </CardContent>
+          {/* Sidebar */}
+          <div className="lg:col-span-4 flex flex-col gap-2 h-full">
+            {/* Dagens tilbud */}
+            <Card className="border border-border shadow-lg overflow-hidden flex-grow">
+              <div className="bg-white p-3 h-8 flex flex-col">
+                <div className="mb-2">
+                  <h3 className="text-2xl font-bold text-primary">
+                    Dagens tilbud 🔥
+                  </h3>
+                  <p className="text-base text-gray-700 mt-2">
+                    Kjøp en kaffe, få en kanelbolle til halv pris!
+                  </p>
+                </div>
+                <div className="w-full flex-grow bg-amber-100 rounded-lg overflow-hidden mt-2 shadow-md min-h-[180px]">
+                  <img
+                    src="/images/kanelbolle.png"
+                    alt="Tilbud"
+                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://placehold.co/400x200?text=Tilbud";
+                    }}
+                  />
+                </div>
+              </div>
             </Card>
 
-            {/* Opening Hours */}
-            <div className="flex-1 flex flex-col">
-              <h2 className="text-2xl md:text-3xl font-bold mb-3 text-primary">
+            {/* Opening hours */}
+            <Card className="border border-border shadow-lg mt-auto">
+              <CardTitle className="text-xl font-bold text-primary text-center pt-3 pb-2">
                 Åpningstider
-              </h2>
-              <Card className="border border-border shadow-lg flex-1">
-                <CardContent className="p-4 h-full">
-                  <div className="grid grid-cols-2 gap-1 h-full">
-                    {openingHours.length > 0 ? (
-                      openingHours.map((item) => (
-                        <React.Fragment key={item.day}>
-                          <div
-                            className={`font-medium ${
-                              isToday(item.day) ? "text-primary font-bold" : ""
-                            }`}
-                          >
-                            {item.day}
-                          </div>
-                          <div
-                            className={`text-right ${
-                              isToday(item.day) ? "text-primary font-bold" : ""
-                            }`}
-                          >
-                            {item.hours}
-                          </div>
-                        </React.Fragment>
-                      ))
-                    ) : (
-                      <p className="col-span-2 text-center">
-                        Ingen åpningstider
-                      </p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+              </CardTitle>
+              <CardContent className="p-3">
+                <div className="grid grid-cols-2 gap-y-2">
+                  {openingHours.map((item) => (
+                    <React.Fragment key={item.day}>
+                      <div
+                        className={`text-base font-medium ${
+                          isToday(item.day) ? "text-primary font-bold" : ""
+                        }`}
+                      >
+                        {item.day}
+                      </div>
+                      <div
+                        className={`text-base text-right ${
+                          isToday(item.day) ? "text-primary font-bold" : ""
+                        }`}
+                      >
+                        {item.hours}
+                      </div>
+                    </React.Fragment>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
-
-        {/* Footer with auto-rotating messages */}
-        <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-3 shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
-          <div className="container mx-auto max-w-[95%]">
+        {/* Footer Carousel */}
+        <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
+          <div className="container mx-auto max-w-[100%]">
             <Carousel
-              plugins={[
-                Autoplay({
-                  delay: 8000,
-                }),
-              ]}
-              opts={{
-                loop: true,
-              }}
+              plugins={[Autoplay({ delay: 8000 })]}
+              opts={{ loop: true }}
               className="w-full"
             >
               <CarouselContent>

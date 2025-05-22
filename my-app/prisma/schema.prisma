@@ -30,3 +30,9 @@ model DailyContent {
   quoteHistory  String   @default("[]")
   updatedAt     DateTime @updatedAt
 }
+
+model Login {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
+}
