@@ -459,6 +459,12 @@ export default function DashboardPage() {
         <Button variant="outline" onClick={fetchData}>
           Oppdater data
         </Button>
+        <Button
+          variant="default"
+          onClick={() => (window.location.href = "/infoskjerm")}
+        >
+          <Settings className="mr-2 h-4 w-4" /> Gå til infoskjerm
+        </Button>
       </div>
       {error && (
         <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-md text-red-700">
