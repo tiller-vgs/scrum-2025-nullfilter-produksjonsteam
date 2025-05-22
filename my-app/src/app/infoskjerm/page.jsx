@@ -25,6 +25,8 @@ export default function InfoscreenPage() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [emblaApi, setEmblaApi] = useState(null);
   const [activeSlide, setActiveSlide] = useState(0);
+  const [dailyOffer, setDailyOffer] = useState("");
+  const [dailyOfferImage, setDailyOfferImage] = useState("");
 
   // Group products into pairs (stacked)
   // Group products into pairs (stacked) without duplication
@@ -138,10 +140,22 @@ export default function InfoscreenPage() {
         const [prodRes, hoursRes] = await Promise.all([
           fetch("/api/products"),
           fetch("/api/opening-hours"),
+          fetch("/api/daily-content"),
         ]);
-        if (!prodRes.ok || !hoursRes.ok) throw new Error();
+        if (!prodRes.ok || !hoursRes.ok || !dailyContentRes.ok)
+          throw new Error();
         setProducts(await prodRes.json());
         setOpeningHours(await hoursRes.json());
+
+        const dailyContentData = await dailyContentRes.json();
+        setDailyOffer(
+          dailyContentData.currentOffer ||
+            "Kjøp en kaffe, få en kanelbolle til halv pris!"
+        );
+        setDailyOfferImage(
+          dailyContentData.offerImage || "/images/kanelbolle.png"
+        );
+
         setError(null);
       } catch {
         setError("Kunne ikke hente data, viser reserve-data.");

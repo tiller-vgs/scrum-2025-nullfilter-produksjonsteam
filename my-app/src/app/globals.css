@@ -79,8 +79,7 @@
 }
 
 .dashboard {
-  --background: oklch(0.97 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: black;
   --card: oklch(0.97 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(0.97 0 0);
