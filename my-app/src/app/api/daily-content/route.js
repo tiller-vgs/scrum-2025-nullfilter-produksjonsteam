@@ -11,6 +11,8 @@ export async function GET() {
     return NextResponse.json({
       currentOffer: dailyContent?.currentOffer || "",
       currentQuote: dailyContent?.currentQuote || "",
+      offerImage: dailyContent?.offerImage || "",
+      quoteImage: dailyContent?.quoteImage || "",
       offers: dailyContent ? JSON.parse(dailyContent.offerHistory) : [],
       quotes: dailyContent ? JSON.parse(dailyContent.quoteHistory) : [],
     });
@@ -22,10 +24,9 @@ export async function GET() {
     );
   }
 }
-
 export async function POST(request) {
   try {
-    const { type, content } = await request.json();
+    const { type, content, image } = await request.json();
 
     if (!content || !type || (type !== "offer" && type !== "quote")) {
       return NextResponse.json(
@@ -43,6 +44,8 @@ export async function POST(request) {
         data: {
           currentOffer: type === "offer" ? content : "",
           currentQuote: type === "quote" ? content : "",
+          offerImage: type === "offer" ? image || "" : "",
+          quoteImage: type === "quote" ? image || "" : "",
           offerHistory: type === "offer" ? JSON.stringify([content]) : "[]",
           quoteHistory: type === "quote" ? JSON.stringify([content]) : "[]",
         },
@@ -62,6 +65,7 @@ export async function POST(request) {
           where: { id: dailyContent.id },
           data: {
             currentOffer: content,
+            offerImage: image || dailyContent.offerImage || "",
             offerHistory: JSON.stringify(offerHistory),
           },
         });
@@ -75,6 +79,7 @@ export async function POST(request) {
           where: { id: dailyContent.id },
           data: {
             currentQuote: content,
+            quoteImage: image || dailyContent.quoteImage || "",
             quoteHistory: JSON.stringify(quoteHistory),
           },
         });

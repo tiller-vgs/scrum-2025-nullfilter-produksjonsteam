@@ -69,6 +69,11 @@ export default function DashboardPage() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [editingDay, setEditingDay] = useState(null);
 
+  // Add these state variables with your other states
+  const [dailyContentImage, setDailyContentImage] = useState("");
+  const [dailyContentPreviewImage, setDailyContentPreviewImage] = useState("");
+  const [uploadingDailyImage, setUploadingDailyImage] = useState(false);
+
   // Image upload states
   const [uploadingImage, setUploadingImage] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
@@ -131,20 +136,6 @@ export default function DashboardPage() {
     }
   };
 
-  // Product form schema
-  const productFormSchema = z.object({
-    name: z.string().min(2, "Navn må ha minst 2 tegn"),
-    description: z.string().min(10, "Beskrivelse må ha minst 10 tegn"),
-    price: z.string().min(2, "Pris er påkrevd"),
-    image: z.string().min(1, "Bilde er påkrevd"),
-    promotion: z.string().optional(),
-  });
-
-  // Opening hours form schema
-  const hoursFormSchema = z.object({
-    hours: z.string().min(1, "Timer er påkrevd"),
-  });
-
   const handleSaveDailyContent = async () => {
     if (!newDailyContent.trim()) {
       toast.error("Tomt innhold", {
@@ -163,6 +154,7 @@ export default function DashboardPage() {
         body: JSON.stringify({
           type: contentType,
           content: newDailyContent,
+          image: dailyContentImage, // Add the image URL
         }),
       });
 
@@ -179,7 +171,10 @@ export default function DashboardPage() {
         setCurrentDailyQuote(newDailyContent);
       }
 
-      setNewDailyContent(""); // Clear input
+      // Clear form
+      setNewDailyContent("");
+      setDailyContentImage("");
+      setDailyContentPreviewImage("");
 
       toast.success("Innhold lagret", {
         description: `Dagens ${
@@ -193,6 +188,65 @@ export default function DashboardPage() {
       });
     }
   };
+
+  const handleDailyContentImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      setUploadingDailyImage(true);
+
+      // Create form data for upload
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // Upload the image
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload image");
+      }
+
+      const data = await response.json();
+
+      // Convert relative path to absolute URL if necessary
+      const imageUrl = data.filePath.startsWith("http")
+        ? data.filePath
+        : new URL(data.filePath, window.location.origin).toString();
+
+      // Set the image URL in state
+      setDailyContentImage(imageUrl);
+      setDailyContentPreviewImage(imageUrl);
+
+      toast.success("Bilde lastet opp", {
+        description: "Bildet ditt har blitt lastet opp",
+      });
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error("Opplasting feilet", {
+        description: "Kunne ikke laste opp bildet. Vennligst prøv igjen.",
+      });
+    } finally {
+      setUploadingDailyImage(false);
+    }
+  };
+
+  // Product form schema
+  const productFormSchema = z.object({
+    name: z.string().min(2, "Navn må ha minst 2 tegn"),
+    description: z.string().min(10, "Beskrivelse må ha minst 10 tegn"),
+    price: z.string().min(2, "Pris er påkrevd"),
+    image: z.string().min(1, "Bilde er påkrevd"),
+    promotion: z.string().optional(),
+  });
+
+  // Opening hours form schema
+  const hoursFormSchema = z.object({
+    hours: z.string().min(1, "Timer er påkrevd"),
+  });
 
   const handleSelectHistoryItem = (value) => {
     setNewDailyContent(value);
@@ -453,11 +507,17 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div class="dashboard" className="container mx-auto p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Kafé Dashbord</h1>
         <Button variant="outline" onClick={fetchData}>
           Oppdater data
+        </Button>
+        <Button
+          variant="default"
+          onClick={() => (window.location.href = "/infoskjerm")}
+        >
+          <Settings className="mr-2 h-4 w-4" /> Gå til infoskjerm
         </Button>
       </div>
       {error && (
@@ -679,6 +739,81 @@ export default function DashboardPage() {
                   />
                   <Button onClick={handleSaveDailyContent}>Lagre</Button>
                 </div>
+
+                {/* Add image upload section */}
+                <div className="mt-4 space-y-2">
+                  <label className="text-sm font-medium">
+                    Legg til bilde (valgfritt):
+                  </label>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex justify-between items-center">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() =>
+                          document
+                            .getElementById("daily-content-image-upload")
+                            .click()
+                        }
+                        disabled={uploadingDailyImage}
+                        className="relative"
+                      >
+                        <Upload className="mr-2 h-4 w-4" />
+                        {uploadingDailyImage ? "Laster opp..." : "Velg fil"}
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleDailyContentImageUpload}
+                          disabled={uploadingDailyImage}
+                          id="daily-content-image-upload"
+                          className="hidden absolute inset-0 opacity-0 cursor-pointer"
+                        />
+                      </Button>
+
+                      {dailyContentImage && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setDailyContentImage("");
+                            setDailyContentPreviewImage("");
+                          }}
+                        >
+                          Fjern bilde
+                        </Button>
+                      )}
+                    </div>
+                    {uploadingDailyImage && (
+                      <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-1 bg-primary animate-pulse"></div>
+                      </div>
+                    )}
+
+                    {/* Image preview */}
+                    {dailyContentPreviewImage && (
+                      <div className="border rounded-md p-2 bg-gray-50">
+                        <p className="text-sm font-medium mb-2">
+                          Bildeforhåndsvisning:
+                        </p>
+                        <div className="relative w-full h-36 rounded-md overflow-hidden border bg-white">
+                          <img
+                            src={dailyContentPreviewImage}
+                            alt="Forhåndsvisning"
+                            className="object-contain w-full h-full"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src =
+                                "https://via.placeholder.com/150?text=Bilde+Feil";
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <p className="text-xs text-gray-500">
                   Maks 10 {isDailyOffer ? "tilbud" : "sitater"} lagres i
                   historikken. Eldre innhold erstattes automatisk.
