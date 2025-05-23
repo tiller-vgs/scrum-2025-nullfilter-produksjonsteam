@@ -126,7 +126,7 @@ export default function InfoscreenPage() {
         </div>
         <CardContent className="p-3 flex flex-col h-[calc(100%-180px)]">
           <CardTitle className="text-lg mb-0">{product.name}</CardTitle>
-          <CardDescription className="text-sm mt-1">
+          <CardDescription className="text-blackcoffee -sm mt-1">
             {product.description}
           </CardDescription>
           <div className="mt-auto pt-2">
@@ -165,7 +165,6 @@ export default function InfoscreenPage() {
 
         setError(null);
       } catch {
-        setError("Kunne ikke hente data, viser reserve-data.");
         setProducts([
           {
             id: 1,
@@ -237,10 +236,10 @@ export default function InfoscreenPage() {
           </div>
         )}
         <div className="mb-3">
-          <div className="bg-white border-b-3 border-primary rounded-md shadow-md py-4 px-6">
+          <div className="bg-coffee border-b-3 border-primary rounded-md shadow-md py-4 px-6">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-4">
-                <div className="bg-primary text-white p-3 rounded-md hidden sm:flex items-center justify-center">
+                <div className="bg-primary text-latte p-3 rounded-md hidden sm:flex items-center justify-center">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="28"
@@ -266,7 +265,7 @@ export default function InfoscreenPage() {
                   >
                     NullFilter Kafé
                   </h1>
-                  <p className="text-sm text-gray-500 hidden sm:block">
+                  <p className="text-sm font-bold text-coacoa hidden sm:block">
                     Din lokale kafé på Tiller VGS
                   </p>
                 </div>
@@ -274,14 +273,14 @@ export default function InfoscreenPage() {
 
               <div className="flex items-center gap-5">
                 <div className="text-right">
-                  <div className="text-sm font-medium text-gray-500">
+                  <div className="text-sm font-medium blackcoffee">
                     {formatDate()}
                   </div>
                   <div className="text-2xl font-bold text-primary">
                     {formatTime()}
                   </div>
                 </div>
-                <div className="hidden md:block border-l border-gray-200 pl-4">
+                <div className="hidden md:block border-l border-latte pl-4">
                   <div className="flex items-center gap-1.5">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -310,7 +309,7 @@ export default function InfoscreenPage() {
         <div className="grid grid-cols-3 grid-rows-1 lg:grid-cols-12 gap-2 flex-grow">
           {/* Products Carousel */}
           <div className="lg:col-span-8 flex flex-col">
-            <h2 className="text-2xl md:text-3xl font-bold text-primary">
+            <h2 className="text-2xl md:text-3xl font-bold text-primary px-1">
               Produkter
             </h2>
             <div className="flex-grow relative">
@@ -330,13 +329,13 @@ export default function InfoscreenPage() {
                   {columns.map(([top, bottom], idx) => (
                     <CarouselItem
                       key={idx}
-                      className="flex-shrink-0 basis-1/3 h-full"
+                      className="flex-shrink-0 basis-1/3 h-full drop-shadow-lg"
                     >
                       <div className="flex flex-col justify-between h-full space-y-1">
-                        <Card className="border border-border shadow-lg overflow-hidden">
+                        <Card className="border-3 border-border shadow-lg overflow-hidden">
                           {renderProductCard(top)}
                         </Card>
-                        <Card className="border border-border shadow-lg overflow-hidden">
+                        <Card className="border-3 border-border shadow-lg overflow-hidden">
                           {renderProductCard(bottom)}
                         </Card>
                       </div>
@@ -345,7 +344,7 @@ export default function InfoscreenPage() {
                 </CarouselContent>
 
                 {/* Slide counter */}
-                <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-sm px-2 py-1 rounded">
+                <div className="absolute top-2 right-2 bg-coacoa bg-opacity-50 text-latte text-sm px-2 py-1 rounded">
                   {activeSlide + 1}/{columns.length}
                 </div>
                 {/* Indicators */}
@@ -364,17 +363,19 @@ export default function InfoscreenPage() {
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-4 flex flex-col gap-2 h-full">
+          <div className="lg:col-span-4 flex flex-col gap-2 h-full px-1">
             {/* Dagens tilbud */}
-            <Card className="border border-border shadow-lg overflow-hidden flex-grow">
-              <div className="bg-white p-3 flex flex-col h-full">
-                <div>
+            <Card className="border-3 border-border shadow-lg overflow-hidden flex-grow">
+              <div className="bg-latte p-3 h-8 flex flex-col">
+                <div className="mb-2 drop-shadow-lg">
                   <h3 className="text-2xl font-bold text-primary">
                     Dagens tilbud 🔥
                   </h3>
-                  <p className="text-base text-gray-700 mt-2">{dailyOffer}</p>
+                  <p className="text-base text-blackcoffee mt-2">
+                    {dailyOffer}
+                  </p>
                 </div>
-                <div className="w-full mt-4 rounded-lg overflow-hidden shadow-md h-[200px]">
+                <div className="w-full flex-grow bg-latte rounded-lg overflow-hidden mt-2 shadow-md min-h-[180px]">
                   <img
                     src={dailyOfferImage || "/images/kanelbolle.png"}
                     alt="Dagens tilbud"
@@ -388,8 +389,8 @@ export default function InfoscreenPage() {
               </div>
             </Card>
             {/* Opening hours */}
-            <Card className="border border-border shadow-lg mt-auto">
-              <CardTitle className="text-xl font-bold text-primary text-center pt-3 pb-2">
+            <Card className="border-3 border-border shadow-lg mt-auto drop-shadow-lg">
+              <CardTitle className="text-2xl font-bold text-primary text-center pt-3 pb-2">
                 Åpningstider
               </CardTitle>
               <CardContent className="p-3">
@@ -418,7 +419,7 @@ export default function InfoscreenPage() {
           </div>
         </div>
         {/* Footer Carousel */}
-        <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
+        <div className="fixed bottom-0 left-0 right-0 bg-blackcoffee/90 text-latte shadow-[0_-2px_10px_rgba(0,0,0,0.1)] border-t-3 border-blackcoffee">
           <div className="container mx-auto max-w-[100%]">
             <Carousel
               plugins={[Autoplay({ delay: 8000 })]}
