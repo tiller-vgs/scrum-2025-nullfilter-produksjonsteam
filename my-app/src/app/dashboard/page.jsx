@@ -507,7 +507,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div class="dashboard" className="container mx-auto p-6">
+    <div className="container mx-auto p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Kafé Dashbord</h1>
         <Button variant="outline" onClick={fetchData}>
@@ -543,15 +543,17 @@ export default function DashboardPage() {
                 <div className="space-y-2">
                   {products.map((product) => (
                     <Card key={product.id} className="overflow-hidden">
-                      <div className="flex justify-between items-center px-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3">
-                            <h3 className="font-medium">{product.name}</h3>
-                            <p className="text-xs text-gray-500 line-clamp-1 max-w-[70%]">
+                      <div className="flex items-center px-3 py-2">
+                        <div className="flex-1 min-w-0 mr-2">
+                          <div className="flex flex-col">
+                            <h3 className="font-medium truncate">
+                              {product.name}
+                            </h3>
+                            <p className="text-xs text-gray-500 line-clamp-1">
                               {product.description}
                             </p>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 mt-1">
                             <span className="text-sm font-medium">
                               {product.price}
                             </span>
@@ -562,31 +564,33 @@ export default function DashboardPage() {
                             )}
                           </div>
                         </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Åpne meny</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => handleEditProduct(product)}
-                            >
-                              <Pencil className="mr-2 h-4 w-4" /> Rediger
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="text-red-600"
-                              onClick={() => handleDeleteProduct(product.id)}
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" /> Slett
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div className="flex-shrink-0">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Åpne meny</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => handleEditProduct(product)}
+                              >
+                                <Pencil className="mr-2 h-4 w-4" /> Rediger
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={() => handleDeleteProduct(product.id)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" /> Slett
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
                     </Card>
                   ))}
@@ -737,7 +741,6 @@ export default function DashboardPage() {
                     onChange={(e) => setNewDailyContent(e.target.value)}
                     className="flex-1"
                   />
-                  <Button onClick={handleSaveDailyContent}>Lagre</Button>
                 </div>
 
                 {/* Add image upload section */}
@@ -812,6 +815,11 @@ export default function DashboardPage() {
                       </div>
                     )}
                   </div>
+                </div>
+
+                {/* Save button moved to the bottom right */}
+                <div className="flex justify-end mt-4">
+                  <Button onClick={handleSaveDailyContent}>Lagre</Button>
                 </div>
 
                 <p className="text-xs text-gray-500">

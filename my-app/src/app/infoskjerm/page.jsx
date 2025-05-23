@@ -98,16 +98,18 @@ export default function InfoscreenPage() {
     return days[currentTime.getDay()] === day;
   };
 
+  // In the renderProductCard function
   const renderProductCard = (product) => {
-    if (!product) return <div className="h-[200px] bg-muted/20"></div>;
+    if (!product)
+      return <div className="h-[200px] bg-muted/20 rounded-lg"></div>;
 
     return (
       <>
-        <div className="relative h-[200px]">
+        <div className="relative h-[200px] rounded-lg overflow-hidden">
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain bg-white"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = "https://placehold.co/400x300?text=Produktbilde";
@@ -127,6 +129,11 @@ export default function InfoscreenPage() {
           <CardDescription className="text-sm mt-1">
             {product.description}
           </CardDescription>
+          <div className="mt-auto pt-2">
+            <Badge variant="secondary" className="text-sm font-bold">
+              {product.price}
+            </Badge>
+          </div>
         </CardContent>
       </>
     );
@@ -137,7 +144,7 @@ export default function InfoscreenPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [prodRes, hoursRes] = await Promise.all([
+        const [prodRes, hoursRes, dailyContentRes] = await Promise.all([
           fetch("/api/products"),
           fetch("/api/opening-hours"),
           fetch("/api/daily-content"),
@@ -360,20 +367,18 @@ export default function InfoscreenPage() {
           <div className="lg:col-span-4 flex flex-col gap-2 h-full">
             {/* Dagens tilbud */}
             <Card className="border border-border shadow-lg overflow-hidden flex-grow">
-              <div className="bg-white p-3 h-8 flex flex-col">
-                <div className="mb-2">
+              <div className="bg-white p-3 flex flex-col h-full">
+                <div>
                   <h3 className="text-2xl font-bold text-primary">
                     Dagens tilbud 🔥
                   </h3>
-                  <p className="text-base text-gray-700 mt-2">
-                    Kjøp en kaffe, få en kanelbolle til halv pris!
-                  </p>
+                  <p className="text-base text-gray-700 mt-2">{dailyOffer}</p>
                 </div>
-                <div className="w-full flex-grow bg-amber-100 rounded-lg overflow-hidden mt-2 shadow-md min-h-[180px]">
+                <div className="w-full mt-4 rounded-lg overflow-hidden shadow-md h-[200px]">
                   <img
-                    src="/images/kanelbolle.png"
-                    alt="Tilbud"
-                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    src={dailyOfferImage || "/images/kanelbolle.png"}
+                    alt="Dagens tilbud"
+                    className="w-full h-full object-contain hover:scale-105 transition-transform duration-500"
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src = "https://placehold.co/400x200?text=Tilbud";
@@ -382,7 +387,6 @@ export default function InfoscreenPage() {
                 </div>
               </div>
             </Card>
-
             {/* Opening hours */}
             <Card className="border border-border shadow-lg mt-auto">
               <CardTitle className="text-xl font-bold text-primary text-center pt-3 pb-2">

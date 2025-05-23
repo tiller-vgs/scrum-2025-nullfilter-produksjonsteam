@@ -26,6 +26,8 @@ model DailyContent {
   id            Int      @id @default(autoincrement())
   currentOffer  String?
   currentQuote  String?
+  offerImage    String?  // Add this field
+  quoteImage    String?  // Add this field
   offerHistory  String   @default("[]")
   quoteHistory  String   @default("[]")
   updatedAt     DateTime @updatedAt

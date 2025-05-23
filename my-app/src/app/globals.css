@@ -1,8 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -78,72 +76,11 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-.dashboard {
+.theme-dashboard {
   --background: black;
-  --card: oklch(0.97 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(0.97 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(1 0 0);
-}
-
-.dark {
-  /* Flip background and foreground */
-  --background: #000000; /* Pure black background */
-  --foreground: #ffffff; /* Pure white text */
-
-  /* Flip card colors */
-  --card: #121212; /* Dark cards */
-  --card-foreground: #ffffff; /* White text on cards */
-
-  /* Flip popover colors */
-  --popover: #121212; /* Dark popovers */
-  --popover-foreground: #ffffff; /* White text on popovers */
-
-  /* Flip primary colors */
-  --primary: #ffffff; /* White primary */
-  --primary-foreground: #000000; /* Black text on primary */
-
-  /* Flip secondary colors */
-  --secondary: #1a1a1a; /* Dark secondary */
-  --secondary-foreground: #ffffff; /* White text on secondary */
-
-  /* Flip muted colors */
-  --muted: #1a1a1a; /* Dark muted */
-  --muted-foreground: #a0a0a0; /* Light grey text on muted */
-
-  /* Flip accent colors */
-  --accent: #1a1a1a; /* Dark accent */
-  --accent-foreground: #ffffff; /* White text on accent */
-
-  /* Keep destructive as a recognizable red but darken it */
-  --destructive: #b91c1c; /* Dark red */
-  --destructive-foreground: #ffffff; /* White text on destructive */
-
-  /* Flip borders and inputs */
-  --border: #333333; /* Dark borders */
-  --input: #333333; /* Dark inputs */
-  --ring: #555555; /* Dark ring */
-
-  /* Flip sidebar colors */
-  --sidebar: #121212; /* Dark sidebar */
-  --sidebar-foreground: #ffffff; /* White text on sidebar */
-  --sidebar-primary: #ffffff; /* White primary on sidebar */
-  --sidebar-primary-foreground: #000000; /* Black text on sidebar primary */
-  --sidebar-accent: #1a1a1a; /* Dark accent on sidebar */
-  --sidebar-accent-foreground: #ffffff; /* White text on sidebar accent */
-  --sidebar-border: #333333; /* Dark borders on sidebar */
-  --sidebar-ring: #555555; /* Dark rings on sidebar */
-}
-
-/* Force dark mode styling */
-@layer utilities {
-  html.dark,
-  html.dark body {
-    background-color: #000000 !important;
-    color: #ffffff !important;
-  }
+  --foreground: oklch(0.2 0 0);
+  --primary: oklch(0.6 0.18 250); /* Blue */
+  --accent: oklch(0.8 0.1 250);
 }
 
 @layer base {
