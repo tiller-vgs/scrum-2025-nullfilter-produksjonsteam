@@ -415,30 +415,13 @@ export default function InfoscreenPage() {
         </div>
         {/* Footer Carousel */}
         <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
-          <div className="container mx-auto max-w-[100%]">
-            <Carousel
-              plugins={[Autoplay({ delay: 8000 })]}
-              opts={{ loop: true }}
-              className="w-full"
-            >
-              <CarouselContent>
-                <CarouselItem>
-                  <p className="text-center text-xl md:text-2xl">
-                    ☕ Kaffen vår er nymalt hver dag for best mulig smak
-                  </p>
-                </CarouselItem>
-                <CarouselItem>
-                  <p className="text-center text-xl md:text-2xl">
-                    🍪 Alle bakevarer er hjemmelaget i vår egen kafé
-                  </p>
-                </CarouselItem>
-                <CarouselItem>
-                  <p className="text-center text-xl md:text-2xl">
-                    🌱 Vi bruker kun økologiske og lokale råvarer
-                  </p>
-                </CarouselItem>
-              </CarouselContent>
-            </Carousel>
+          <div className="container flex justify-center mx-auto max-w-[100%]">
+            <p className="text-center text-xl md:text-2xl pr-75">
+              ☕ Telefonnummer: *placeholder*
+            </p>
+            <p className="text-center text-xl md:text-2xl">
+              🍪 Epost: *placeholder*
+            </p>
           </div>
         </div>
       </div>
