@@ -1,3 +1,5 @@
+Create .env with `DATABASE_URL="file:../database/cafe.db"`
+
 # Agile-template
 - Legg til agile project fra template
 - Oppdater iterations/sprinter
